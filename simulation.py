@@ -16,27 +16,34 @@ class Simulation():
     def set_vitesse_droite(self, v):
         self.robot.set_vitesse_droite(v)
     
-    def distance_obstacle(self,max_range=120):
-        """Cette fonction regarde l'obstacle le plus proche"""
-        min_dist = max_range #distance minimale
+    def distance_obstacle(self, max_range=140):
+     min_dist = max_range
+     dir_x = math.cos(self.robot.angle)
+     dir_y = math.sin(self.robot.angle)
 
-        # vecteur direction du voiture
-        dir_x = math.cos(self.robot.angle)
-        dir_y = math.sin(self.robot.angle)
+     for obs in self.obstacles:
+        # On calcule le CENTRE de l'obstacle (car obs.pos est le coin haut-gauche)
+         cx = obs.pos[0] + obs.dim[0] / 2
+         cy = obs.pos[1] + obs.dim[1] / 2
         
-        for obs in self.obstacles:
-            ox, oy = obs.pos
-            dx = ox - self.robot.x #on cree un vecteur du voiture vers l’obstacle
-            dy = oy - self.robot.y
+         dx = cx - self.robot.x
+         dy = cy - self.robot.y
 
-            # projection dans la direction du voiture
-            projection = dx * dir_x + dy * dir_y #produit scalaire
-            if 0 < projection < max_range: #on regard si l'obstacle est proche
-                dist = math.sqrt(dx**2 + dy**2)
-                if dist < min_dist:
-                    min_dist = dist #on garde l'obstacle le plus proche devant
+        # Projection (est-ce que l'obstacle est devant nous ?)
+         projection = dx * dir_x + dy * dir_y
+        
+         if 0 < projection < max_range:
+            # Distance réelle au centre
+            dist_au_centre = math.sqrt(dx**2 + dy**2)
+            # On soustrait le "rayon" de l'obstacle pour avoir la distance au BORD
+            # On prend la plus grande dimension / 2 pour être sécuritaire
+            rayon_obs = max(obs.dim) / 2
+            dist_au_bord = dist_au_centre - rayon_obs
+            
+            if dist_au_bord < min_dist:
+                min_dist = max(0, dist_au_bord)
 
-        return min_dist
+     return min_dist
 
     def distance_mur(self,max_range=120):
         """Cette fonction renvoie la distance au mur le plus proche dans la direction du voiture"""

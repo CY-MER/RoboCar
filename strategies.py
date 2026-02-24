@@ -20,18 +20,20 @@ class Deplacement:
         self.sim.set_vitesse_gauche(-vitesse)
         self.sim.set_vitesse_droite(vitesse)
 
-    def eviter_obstacles(self, vitesse_avance=80, vitesse_tourne=60, seuil=90):
-        """Met à jour les vitesses des roues pour avancer et éviter les obstacles."""
-        dist_obs = self.sim.distance_obstacle(max_range=140) #la distance au plus proche obstacle devant le robot
-        dist_mur = self.sim.distance_mur(max_range=140) #la distance au mur le plus proche
-        distance = min(dist_obs, dist_mur)
+    def eviter_obstacles(self, vitesse_avance=80, vitesse_tourne=60, seuil=30):
+     dist_obs = self.sim.distance_obstacle(max_range=140)
+     dist_mur = self.sim.distance_mur(max_range=40)
+     distance = min(dist_obs, dist_mur)
 
-        if distance <seuil:
-            # tourne
-            self.tourner_sur_place(vitesse_tourne)
-        else:
-            # avance
-            self.avancer(vitesse_avance)
+     if distance < seuil:
+        # Au lieu de tourner sur place, on fait un virage serré
+        # On réduit la vitesse d'une roue plus que l'autre
+        self.sim.set_vitesse_gauche(-vitesse_tourne) 
+        self.sim.set_vitesse_droite(vitesse_tourne)
+     else:
+        # On avance, mais on peut ajouter un tout petit peu de rotation 
+        # aléatoire ou constante pour qu'il ne reste pas sur une ligne droite infinie
+        self.avancer(vitesse_avance)
             
     def avancer_x_metres(self, distance, vitesse):
         """Fait avancer le robot d'une distance donnée en mètres à une vitesse donnée."""

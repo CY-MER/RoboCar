@@ -53,9 +53,9 @@ def main():
 
     robot = RoboCar("Flash", (400, 300), 0)
     obstacles = [
-        Obstacle("rectangle", (100, 100), (80, 80)),
+        Obstacle("rectangle", (100, 100), (80, 100)),
         Obstacle("rectangle", (500, 200), (100, 50)),
-        Obstacle("rectangle", (300, 450), (120, 60)),
+        Obstacle("rectangle", (300, 450), (50, 50)),
     ]
     sim = Simulation(robot, obstacles, LARGEUR, HAUTEUR) #on cree la simulation qui contient le robot,les obstacles
     strat = Deplacement(sim) #on cree la stratégie qui reçoit la simulation
@@ -69,7 +69,7 @@ def main():
         if not mouvement_lineaire:
             mouvement_lineaire=strat.avancer_x_metres(2, 80)
         else:
-            strat.eviter_obstacles(80, 60, 70) #on decide quoi faire (avancer,tourner) le robot ne bouge pas la mais on regle sa vitesse seulement
+            strat.eviter_obstacles(80, 60, 30) #on decide quoi faire (avancer,tourner) le robot ne bouge pas la mais on regle sa vitesse seulement
         a_collision = sim.update(dt) #c'est a que le robot bouge réellement
         if a_collision:
             strat.tourner_sur_place(60)
