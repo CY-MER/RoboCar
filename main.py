@@ -30,7 +30,7 @@ def main():
         if a_collision:
             strat.tourner_sur_place(60)
 
-        affichage.update(robot, obstacles)
+        affichage.update()
 
     affichage.stop()
 
