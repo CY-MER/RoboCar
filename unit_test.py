@@ -29,6 +29,22 @@ class TestRoboCar(unittest.TestCase):
         self.robot.set_vitesse_droite(10)
         self.robot.update(1)
         self.assertAlmostEqual(self.robot.x, 110)
+class TestSimulation(unittest.TestCase):
+
+    def setUp(self):
+        self.sim = Simulation(800, 600)
+
+    def test_avancer(self):
+        self.sim.avancer(80)
+        self.assertEqual(self.sim.robot.vG, 80)
+        self.assertEqual(self.sim.robot.vR, 80)
+
+    def test_arreter(self):
+        self.sim.avancer(80)
+        self.sim.arreter()
+        self.assertEqual(self.sim.robot.vG, 0)
+        self.assertEqual(self.sim.robot.vR, 0)
+
 
 
 
