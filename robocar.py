@@ -18,7 +18,7 @@ class RoboCar:
         return self.x, self.y, self.angle
     
     def get_wheel_speeds(self):
-        return self.robot.vG, self.robot.vR
+        return self.vG, self.vR
         
     def set_vitesse_gauche(self, v):
         """Modifier la vitesse du roue gauche"""
