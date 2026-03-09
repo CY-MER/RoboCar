@@ -13,3 +13,16 @@ Obcjetif: visualizer le robot et le contrôler dans un environnement sécurisé
 Obcjetif: Optimisation de la simulation
 3. Automatization du robot </br>
 Obcjetif: Permettre au robot d’exécuter ses comportements de manière autonome, sans intervention humaine.
+
+## Utilisatoin d'API
+
+```bash
+# Entrer dans le bon repositoire 
+$ cd robot2I013
+
+# Installer le package
+$ python3 -m pip install -e 
+
+# Have Fun :)
+```
+
