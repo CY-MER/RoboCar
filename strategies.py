@@ -147,3 +147,60 @@ class EviterObstacles:
             self.sim.avancer(self.vitesse_avance)
 
         return False
+
+
+class GestionStrategies:
+    """
+    Classe qui gere toutes les strategies du robot
+    """
+
+    def __init__(self, simulation):
+
+        self.sim = simulation
+        # differentes strategies disponibles
+        self.avance_depart = AvancerXMetres(simulation, distance=1, vitesse=80)
+        self.freinage = FreinageProgressif(simulation)
+        self.recul = Reculer(simulation, vitesse=50, distance=0.4)
+        self.evitement = EviterObstacles(simulation, vitesse_avance=80, vitesse_tourne=60, seuil=50)
+
+        self.phase = "DEPART" # etat actuel du robot
+
+    def update(self, dt):
+        """
+        Fonction appelee a chaque frame qui choisit quelle strategie appliquer
+        """
+        if self.phase == "DEPART": # phase de depart
+
+            fini = self.avance_depart.update(dt)
+
+            if fini:
+                self.phase = "EVITEMENT"
+        elif self.phase == "RECUL":  # phase de recul
+
+            fini = self.recul.update(dt)
+
+            if fini:
+                self.phase = "EVITEMENT"
+        elif self.phase == "FREINAGE":  # phase de freinage
+
+            fini = self.freinage.update(dt)
+
+            if fini:
+                self.phase = "EVITEMENT"
+        elif self.phase == "EVITEMENT": # phase principale : evitement
+
+            dist_obs = self.sim.distance_obstacle(max_range=140)
+            dist_mur = self.sim.distance_mur(max_range=70)
+
+            dist_gauche = self.sim.distance_cote_gauche(max_range=60)
+            dist_droite = self.sim.distance_cote_droite(max_range=60)
+            if min(dist_obs, dist_mur) < 20 and dist_gauche < 25 and dist_droite < 25:  # si on est completement bloque
+
+                self.recul.declencher()
+                self.phase = "RECUL"
+            elif self.sim.a_collision: # si collision detectee
+
+                self.phase = "FREINAGE"
+
+            else: # sinon on applique l'evitement
+                self.evitement.update(dt)
