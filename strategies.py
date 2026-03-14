@@ -58,3 +58,24 @@ class FreinageProgressif:
         self.sim.freiner(dt)  # on applique le freinage progressif
         vG, vR = self.sim.robot.get_wheel_speeds() # on recupere la vitesse des deux roues
         return abs(vG) < 1 and abs(vR) < 1 # si les vitesses sont presque nulles alors le robot est arrete
+
+class Reculer:
+    """
+    Strategie qui fait reculer le robot sur une distance donnee qui est utilisee quand le robot est bloque
+    """
+
+    def __init__(self, simulation, vitesse=50, distance=0.4):
+
+        self.sim = simulation
+        self.vitesse = vitesse # vitesse a laquelle le robot va reculer
+        self.distance = distance #distance que le robot doit reculer
+        self.depart = None #position de depart du robot quand la strategie commence
+        self.actif = False #booleen qui indique si la strategie est active
+
+    def declencher(self):
+        """
+        Lance la strategie de recule
+        """
+        self.depart = None
+        self.actif = True
+
