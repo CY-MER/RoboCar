@@ -52,7 +52,21 @@ class Simulation:
         """
         self.robot.set_vitesse_gauche(0)
         self.robot.set_vitesse_droite(vitesse)
-
+    def freiner(self, dt, deceleration=120): #deceleration correspond a l'intensite du freinage
+        """Reduit progressivement les vitesses des roues vers 0
+        """
+        pas = deceleration * dt # quantite de vitesse retiree pendant cette frame
+        # freinage roue gauche
+        if self.robot.vG > 0:
+            self.robot.vG = max(0, self.robot.vG - pas)
+        elif self.robot.vG < 0:
+            self.robot.vG = min(0, self.robot.vG + pas)
+        # freinage roue droite
+        if self.robot.vR > 0:
+            self.robot.vR = max(0, self.robot.vR - pas)
+        elif self.robot.vR < 0:
+            self.robot.vR = min(0, self.robot.vR + pas)
+            
     def distance_obstacle(self, max_range=140): #max_range c'est la portee maximale du capteur (en pixels)
         """
         Calcule la distance au plus proche obstacle devant le robot
