@@ -116,3 +116,34 @@ class EviterObstacles:
         self.vitesse_tourne = vitesse_tourne
         self.seuil = seuil # distance a partir de laquelle on considere qu'un obstacle est proche
         self.direction = None  # direction choisie pour contourner
+
+    def update(self, dt):
+        dist_obs = self.sim.distance_obstacle(max_range=140)  # distance a l'obstacle devant
+        dist_mur = self.sim.distance_mur(max_range=70) # distance au mur devant
+        # distances sur les cotes
+        dist_gauche = self.sim.distance_cote_gauche(max_range=60)
+        dist_droite = self.sim.distance_cote_droite(max_range=60)
+        # on prend la distance la plus dangereuse
+        distance = min(dist_obs, dist_mur)
+    
+        if distance < self.seuil:  # obstacle detecte devant
+
+          
+            if self.direction is None:  # on choisit une direction si ce n'est pas deja fait
+                if dist_gauche > dist_droite:  # on choisit le cote avec le plus d'espace
+                    self.direction = "gauche"
+                else:
+                    self.direction = "droite"
+
+            # rotation selon la direction choisie
+            if self.direction == "gauche":
+                self.sim.tourner_gauche(self.vitesse_tourne)
+            else:
+                self.sim.tourner_droite(self.vitesse_tourne)
+
+        else:
+            # si aucun obstacle alors on avance
+            self.direction = None
+            self.sim.avancer(self.vitesse_avance)
+
+        return False
