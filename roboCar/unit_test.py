@@ -1,8 +1,9 @@
 import unittest
+import math
 
-from roboCar.robocar import RoboCar
-from roboCar.simulation import Simulation
-from roboCar.strategies import (
+from .robocar import RoboCar
+from .simulation import Simulation
+from .strategies import (
     AvancerXMetres,
     Reculer,
     FreinageProgressif,
@@ -40,40 +41,61 @@ class TestRoboCar(unittest.TestCase):
         self.assertAlmostEqual(self.robot.x, 110)
         self.assertAlmostEqual(self.robot.y, 200)
 
+    def test_avancer(self):
+        self.robot.avancer(40)
+        self.assertEqual(self.robot.vG, 40)
+        self.assertEqual(self.robot.vR, 40)
+
+    def test_reculer(self):
+        self.robot.reculer(30)
+        self.assertEqual(self.robot.vG, -30)
+        self.assertEqual(self.robot.vR, -30)
+
+    def test_tourner_gauche(self):
+        self.robot.tourner_gauche(50)
+        self.assertEqual(self.robot.vG, 50)
+        self.assertEqual(self.robot.vR, 0)
+
+    def test_tourner_droite(self):
+        self.robot.tourner_droite(50)
+        self.assertEqual(self.robot.vG, 0)
+        self.assertEqual(self.robot.vR, 50)
+
+    def test_freiner(self):
+        self.robot.vG = 100
+        self.robot.vR = 100
+
+        self.robot.freiner(1)
+
+        self.assertEqual(self.robot.vG, 0)
+        self.assertEqual(self.robot.vR, 0)
+
+
 class TestSimulation(unittest.TestCase):
 
     def setUp(self):
         self.sim = Simulation(800, 600)
 
-    def test_avancer(self):
-        self.sim.avancer(80)
-
-        self.assertEqual(self.sim.robot.vG, 80)
-        self.assertEqual(self.sim.robot.vR, 80)
-
-    def test_reculer(self):
-        self.sim.reculer(40)
-
-        self.assertEqual(self.sim.robot.vG, -40)
-        self.assertEqual(self.sim.robot.vR, -40)
-
-    def test_tourner_sur_place(self):
-        self.sim.tourner_sur_place(50)
-
-        self.assertEqual(self.sim.robot.vG, 50)
-        self.assertEqual(self.sim.robot.vR, -50)
-
-    def test_freiner(self):
-        self.sim.robot.vG = 100
-        self.sim.robot.vR = 100
-
-        self.sim.freiner(1)
-
-        self.assertEqual(self.sim.robot.vG, 0)
-        self.assertEqual(self.sim.robot.vR, 0)
+    def test_initialisation(self):
+        self.assertEqual(self.sim.largeur, 800)
+        self.assertEqual(self.sim.hauteur, 600)
+        self.assertIsNotNone(self.sim.robot)
+        self.assertEqual(len(self.sim.obstacles), 3)
 
     def test_distance_obstacle_positive(self):
         dist = self.sim.distance_obstacle()
+        self.assertGreaterEqual(dist, 0)
+
+    def test_distance_mur_positive(self):
+        dist = self.sim.distance_mur()
+        self.assertGreaterEqual(dist, 0)
+
+    def test_distance_cote_gauche_positive(self):
+        dist = self.sim.distance_cote_gauche()
+        self.assertGreaterEqual(dist, 0)
+
+    def test_distance_cote_droite_positive(self):
+        dist = self.sim.distance_cote_droite()
         self.assertGreaterEqual(dist, 0)
 
     def test_obtenir_rectangle(self):
@@ -85,13 +107,26 @@ class TestSimulation(unittest.TestCase):
         resultat = self.sim.collision(obs)
         self.assertIsInstance(resultat, bool)
 
+    def test_appliquer_murs(self):
+        self.sim.robot.x = -100
+        self.sim.robot.y = -100
+
+        self.sim.appliquer_murs()
+
+        self.assertGreaterEqual(self.sim.robot.x, self.sim.robot.longueur / 2)
+        self.assertGreaterEqual(self.sim.robot.y, self.sim.robot.largeur / 2)
+
+    def test_update_retourne_bool(self):
+        resultat = self.sim.update(0.1)
+        self.assertIsInstance(resultat, bool)
+
 
 class TestStrategies(unittest.TestCase):
 
     def setUp(self):
         self.sim = Simulation(800, 600)
 
-        # on enlève les obstacles si on veut tester certaines stratégies sans gêne
+        # on enlève les obstacles pour certains tests simples
         self.sim.obstacles = []
 
     def test_avancer_x_metres_pas_termine_au_premier_appel(self):
@@ -114,6 +149,17 @@ class TestStrategies(unittest.TestCase):
 
         self.assertTrue(fini)
 
+    def test_freinage_progressif(self):
+        self.sim.robot.vG = 50
+        self.sim.robot.vR = 50
+
+        strat = FreinageProgressif(self.sim)
+        fini = strat.update(1)
+
+        self.assertTrue(fini)
+        self.assertEqual(self.sim.robot.vG, 0)
+        self.assertEqual(self.sim.robot.vR, 0)
+
     def test_reculer_declenche(self):
         strat = Reculer(self.sim, vitesse=50, distance=0.4)
 
@@ -131,17 +177,6 @@ class TestStrategies(unittest.TestCase):
         self.assertEqual(self.sim.robot.vG, -50)
         self.assertEqual(self.sim.robot.vR, -50)
 
-    def test_freinage_progressif(self):
-        self.sim.robot.vG = 50
-        self.sim.robot.vR = 50
-
-        strat = FreinageProgressif(self.sim)
-        fini = strat.update(1)
-
-        self.assertTrue(fini)
-        self.assertEqual(self.sim.robot.vG, 0)
-        self.assertEqual(self.sim.robot.vR, 0)
-
     def test_eviter_obstacles_avance_si_rien_devant(self):
         strat = EviterObstacles(self.sim, vitesse_avance=80, vitesse_tourne=60, seuil=50)
 
@@ -149,6 +184,19 @@ class TestStrategies(unittest.TestCase):
 
         self.assertEqual(self.sim.robot.vG, 80)
         self.assertEqual(self.sim.robot.vR, 80)
+
+    def test_distance_securite(self):
+        strat = EviterObstacles(self.sim, vitesse_avance=80, vitesse_tourne=60, seuil=50)
+
+        d_sec = strat.distance_securite(0.1)
+
+        self.assertGreaterEqual(d_sec, 50)
+
+    def test_choisir_direction(self):
+        strat = EviterObstacles(self.sim, vitesse_avance=80, vitesse_tourne=60, seuil=50)
+
+        strat.choisir_direction(100, 50)
+        self.assertEqual(strat.direction, "gauche")
 
     def test_gestion_strategies_initialisation(self):
         strat = GestionStrategies(self.sim)
