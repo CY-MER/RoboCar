@@ -1,6 +1,7 @@
-from simulation import Simulation
-from strategies import GestionStrategies
-from affichage import Affichage
+from roboCar.simulation import Simulation
+from roboCar.strategies import GestionStrategies
+from roboCar.affichage import Affichage
+
 
 LARGEUR = 800
 HAUTEUR = 600
@@ -9,7 +10,6 @@ FPS = 60
 affichage = Affichage(LARGEUR, HAUTEUR)
 sim = Simulation(LARGEUR, HAUTEUR)
 strat = GestionStrategies(sim)
-
 
 def main():
     running = True

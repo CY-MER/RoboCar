@@ -14,7 +14,7 @@ Obcjetif: Optimisation de la simulation
 3. Automatization du robot </br>
 Obcjetif: Permettre au robot d’exécuter ses comportements de manière autonome, sans intervention humaine.
 
-## :computer: Utilisatoin d'API
+## :computer: Utilisation d'API et du Code
 
 ```bash
 # Entrer dans le bon repositoire 
@@ -24,5 +24,7 @@ $ cd robot2I013
 $ python3 -m pip install -e .
 
 # Have Fun :)
+$ python3 main.py
+
 ```
 
