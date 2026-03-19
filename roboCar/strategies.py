@@ -96,6 +96,14 @@ class EviterObstacles:
         self.direction = None
         pass
     
+    def choisir_direction(self, dist_gauche, dist_droite):
+        """Choisit la direction avec le plus d'espace"""
+        if self.direction is None:
+            self.direction = "gauche" if dist_gauche > dist_droite else "droite"
+    
+
+
+
 
 
     def distance_securite(self,dt):
