@@ -1,5 +1,5 @@
 import math
-
+import time 
 
 class RoboCar:
     WHEEL_BASE = 50  # distance entre roues 
@@ -14,6 +14,7 @@ class RoboCar:
         self.vR = 0 #vitesse roue droite
         self.largeur = 40   # largeur (cote roues)
         self.longueur = 60  # longueur (avant/arriere)
+        self._last_update = None
         
     def get_state(self):
         """Recuperer l'etat du robot"""
@@ -75,8 +76,15 @@ class RoboCar:
         self.set_vitesse_gauche(0)
         
 
-    def update(self, dt):
+    def update(self):
         """Mise a jour du robot"""
+        now = time.time()
+        if self._last_update is None:
+            dt = 0.0
+        else:
+            dt = now - self._last_update
+        self._last_update = now
+
         v, w = self.calculer_vitesse()
         self.x += v * math.cos(self.angle) * dt
         self.y += v * math.sin(self.angle) * dt
