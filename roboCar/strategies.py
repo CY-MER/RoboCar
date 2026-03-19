@@ -5,7 +5,7 @@ class AvancerXMetres:
     Le robot avance jusqu'a ce que la distance parcourue atteigne la distance demandee (en metres)
     """
 
-    def _init_(self, simulation, distance, vitesse, marge_mur=35):
+    def __init__(self, simulation, distance, vitesse, marge_mur=35):
         self.sim = simulation      # reference vers la simulation 
         self.distance = distance   # distance a parcourir en metres
         self.vitesse = vitesse     # vitesse des roues
@@ -48,7 +48,7 @@ class Reculer:
     Strategie qui fait reculer le robot sur une distance donnee qui est utilisee quand le robot est bloque
     """
 
-    def _init_(self, simulation, vitesse=50, distance=0.4):
+    def __init__(self, simulation, vitesse=50, distance=0.4):
 
         self.sim = simulation
         self.vitesse = vitesse # vitesse a laquelle le robot va reculer
@@ -142,7 +142,7 @@ class GestionStrategies:
     """
     Classe qui gere toutes les strategies du robot
     """
-    def _init_(self, simulation):
+    def __init__(self, simulation):
         self.sim = simulation
         self.strats = [
             AvancerXMetres(simulation, distance=1, vitesse=80),
