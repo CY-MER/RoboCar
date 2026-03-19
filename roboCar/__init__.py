@@ -5,7 +5,6 @@ from .affichage import Affichage
 from .strategies import (
     AvancerXMetres,
     Reculer,
-    FreinageProgressif,
     EviterObstacles,
     GestionStrategies
 )
