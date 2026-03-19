@@ -198,7 +198,7 @@ class GestionStrategies:
                 self.phase = "EVITEMENT"
         elif self.phase == "RECUL":  # phase de recul
 
-            fini = self.recul.update(dt)
+            fini = self.recul.update()
 
             if fini:
                 self.phase = "EVITEMENT"
