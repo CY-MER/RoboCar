@@ -182,45 +182,9 @@ class GestionStrategies:
             self.strats[self.cur].start()
         self.strats[self.cur].step()
 
-    
-
-
-    def update(self, dt):
-        """
-        Fonction appelee a chaque frame qui choisit quelle strategie appliquer
-        """
-        if self.phase == "DEPART": # phase de depart
-
-            fini = self.avance_depart.update()
-
-            if fini:
-                self.phase = "EVITEMENT"
-        elif self.phase == "RECUL":  # phase de recul
-
-            fini = self.recul.update()
-
-            if fini:
-                self.phase = "EVITEMENT"
-        elif self.phase == "FREINAGE":  # phase de freinage
-
-            fini = self.arreter.update()
-
-            if fini:
-                self.phase = "EVITEMENT"
-        elif self.phase == "EVITEMENT": # phase principale : evitement
-
-            dist_obs = self.sim.distance_obstacle(max_range=140)
-            dist_mur = self.sim.distance_mur(max_range=70)
-
-            dist_gauche = self.sim.distance_cote_gauche(max_range=60)
-            dist_droite = self.sim.distance_cote_droite(max_range=60)
-            if min(dist_obs, dist_mur) < 20 and dist_gauche < 25 and dist_droite < 25:  # si on est completement bloque
-
-                self.recul.declencher()
-                self.phase = "RECUL"
-            elif self.sim.a_collision: # si collision detectee
-
-                self.phase = "FREINAGE"
-
-            else: # sinon on applique l'evitement
-                self.evitement.update(dt)
+    def stop(self):
+        return (
+            not self.mode_collision and
+            self.cur == len(self.strats) - 1 and
+            self.strats[self.cur].stop()
+        )
