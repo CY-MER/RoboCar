@@ -32,7 +32,7 @@ class AvancerXMetres:
             return False
         dx = self.sim.robot.x - self.depart[0]
         dy = self.sim.robot.y - self.depart[1]
-        distance_parcourue = math.sqrt(dx*2 + dy*2)
+        distance_parcourue = math.sqrt(dx**2 + dy**2)
         return distance_parcourue >= distance_pixels
     
 #Il faut creer une nouvelle classe TournerXDegree
@@ -74,7 +74,7 @@ class Reculer:
             return False
         dx = self.sim.robot.x - self.depart[0]
         dy = self.sim.robot.y - self.depart[1]
-        distance_parcourue = math.sqrt(dx*2 + dy*2)
+        distance_parcourue = math.sqrt(dx**2 + dy**2)
         return distance_parcourue >= distance_pixels
 
 
