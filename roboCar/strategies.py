@@ -43,61 +43,39 @@ class TournerXDegrees:
     
     def __init__(self, simulation):
         pass
-
-class FreinageProgressif:
-    """
-    Strategie qui ralentit progressivement le robot jusqu'a ce qu'il soit completement arrete
-    """
-
-    def __init__(self, simulation):
-        self.sim = simulation
-
-    def update(self, dt):
-        self.sim.robot.freiner(dt)  # on applique le freinage progressif
-        vG, vR = self.sim.robot.get_wheel_speeds() # on recupere la vitesse des deux roues
-        return abs(vG) < 1 and abs(vR) < 1 # si les vitesses sont presque nulles alors le robot est arrete
-
 class Reculer:
     """
     Strategie qui fait reculer le robot sur une distance donnee qui est utilisee quand le robot est bloque
     """
 
-    def __init__(self, simulation, vitesse=50, distance=0.4):
+    def _init_(self, simulation, vitesse=50, distance=0.4):
 
         self.sim = simulation
         self.vitesse = vitesse # vitesse a laquelle le robot va reculer
         self.distance = distance #distance que le robot doit reculer
         self.depart = None #position de depart du robot quand la strategie commence
-        self.actif = False #booleen qui indique si la strategie est active
 
-    def declencher(self):
-        """
-        Lance la strategie de recule
-        """
+    def start(self):
         self.depart = None
-        self.actif = True
 
-    def update(self):
-        # si la strategie n'est pas active
-        if not self.actif:
-            return True
+    def step(self):
+        if self.depart is None:
+            self.depart = (self.sim.robot.x, self.sim.robot.y)
+
+        if self.stop():
+            self.sim.robot.arreter()
+            return
+
+        self.sim.robot.reculer(self.vitesse)
+
+    def stop(self):
         distance_pixels = self.distance * 100
-        if self.depart is None: 
-            self.depart = (self.sim.robot.x, self.sim.robot.y)  # memorisation de la position de départ
-
-        self.sim.robot.reculer(self.vitesse)  # on fait reculer le robot
-
-        # calcul distance parcourue
+        if self.depart is None:
+            return False
         dx = self.sim.robot.x - self.depart[0]
         dy = self.sim.robot.y - self.depart[1]
-        distance_parcourue = math.sqrt(dx**2 + dy**2)
-
-        if distance_parcourue >= distance_pixels: # si la distance est atteinte
-            self.sim.robot.arreter()
-            self.actif = False
-            return True
-
-        return False
+        distance_parcourue = math.sqrt(dx*2 + dy*2)
+        return distance_parcourue >= distance_pixels
 
 
 class EviterObstacles:
@@ -196,7 +174,7 @@ class GestionStrategies:
                 self.phase = "EVITEMENT"
         elif self.phase == "FREINAGE":  # phase de freinage
 
-            fini = self.arreter.update(dt)
+            fini = self.arreter.update()
 
             if fini:
                 self.phase = "EVITEMENT"
