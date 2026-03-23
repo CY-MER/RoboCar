@@ -1,17 +1,20 @@
 import unittest
 import math
-import time 
+import time
 from Source import (
     RoboCar,
     Simulation,
     AvancerXMetres,
+    TournerXDegrees,
     Reculer,
     EviterObstacles,
     GestionStrategies,
 )
+
+
 class TestRoboCar(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self): #setUp sert a preparer ce dont les tests ont besoin avant chaque test
         self.robot = RoboCar("Flash", (100, 200), 0)
 
     def test_initialisation(self):
@@ -62,6 +65,11 @@ class TestRoboCar(unittest.TestCase):
         self.robot.tourner_droite(50)
         self.assertEqual(self.robot.vG, 0)
         self.assertEqual(self.robot.vR, 50)
+
+    def test_tourner_sur_place(self):
+        self.robot.tourner_sur_place(50)
+        self.assertEqual(self.robot.vG, 50)
+        self.assertEqual(self.robot.vR, -50)
 
     def test_arreter(self):
         self.robot.vG = 100
@@ -155,6 +163,41 @@ class TestStrategies(unittest.TestCase):
         self.assertEqual(self.sim.robot.vG, 80)
         self.assertEqual(self.sim.robot.vR, 80)
 
+    def test_tourner_x_degrees_pas_termine_au_premier_appel(self):
+        strat = TournerXDegrees(self.sim, angle=90, vitesse=80)
+        strat.start()
+        strat.step()
+
+        self.assertFalse(strat.stop())
+
+    def test_tourner_x_degrees_commande_rotation(self):
+        strat = TournerXDegrees(self.sim, angle=90, vitesse=80)
+        strat.start()
+        strat.step()
+
+        self.assertEqual(self.sim.robot.vG, 80)
+        self.assertEqual(self.sim.robot.vR, -80)
+
+    def test_tourner_x_degrees_termine_si_angle_atteint(self):
+        strat = TournerXDegrees(self.sim, angle=90, vitesse=80)
+        strat.start()
+        strat.step()
+
+        # on simule une rotation de 90 degres
+        self.sim.robot.angle = strat.depart + math.radians(90)
+
+        self.assertTrue(strat.stop())
+
+    def test_tourner_x_degrees_pas_termine_si_angle_insuffisant(self):
+        strat = TournerXDegrees(self.sim, angle=90, vitesse=80)
+        strat.start()
+        strat.step()
+
+        # on simule une rotation plus petite que 90 degres
+        self.sim.robot.angle = strat.depart + math.radians(45)
+
+        self.assertFalse(strat.stop())
+
     def test_reculer_pas_termine_au_premier_appel(self):
         strat = Reculer(self.sim, vitesse=50, distance=0.4)
         strat.start()
@@ -187,7 +230,7 @@ class TestStrategies(unittest.TestCase):
         self.assertEqual(self.sim.robot.vG, 80)
         self.assertEqual(self.sim.robot.vR, 80)
 
-    def test_choisir_direction(self):
+    def test_choisir_direction_gauche(self):
         strat = EviterObstacles(self.sim, vitesse_avance=80, vitesse_tourne=60, seuil=50)
         strat.choisir_direction(100, 50)
 
