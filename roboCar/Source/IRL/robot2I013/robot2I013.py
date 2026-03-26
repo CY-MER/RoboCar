@@ -2,13 +2,13 @@ import time
 import math
 from easygopigo3 import EasyGoPiGo3,Servo,DistanceSensor,MotionSensor  # type: ignore
 import picamera  # type: ignore
-#from io import BytesIO
-#from PIL import Image
+from io import BytesIO
+from PIL import Image
 from di_sensors import distance_sensor as ds_sensor  # type: ignore
 from di_sensors import  inertial_measurement_unit as imu  # type: ignore
-#import threading
-#from collections import deque
-#import numpy as np
+import threading
+from collections import deque
+import numpy as np
 
 class Robot2IN013:
     """ 
