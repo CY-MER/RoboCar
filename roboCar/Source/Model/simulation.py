@@ -21,6 +21,7 @@ class Simulation:
         self.largeur = largeur
         self.hauteur = hauteur
         self.a_collision = False # booleen indiquant si le robot a rencontre un obstacle
+        self._last_update = None #la derniere mise a jour de la simulation
 
     def distance_obstacle(self, max_range=140): #max_range c'est la portee maximale du capteur (en pixels)
         """
