@@ -21,7 +21,7 @@ class Simulation:
         self.largeur = largeur
         self.hauteur = hauteur
         self.a_collision = False # booleen indiquant si le robot a rencontre un obstacle
-        self._last_update = None #la derniere mise a jour de la simulation
+        self._last_update = None #garde le moment de la dernière mise à jour de la simulation
 
     def distance_obstacle(self, max_range=140): #max_range c'est la portee maximale du capteur (en pixels)
         """
@@ -177,7 +177,12 @@ class Simulation:
     def update(self):
         """Met a jour la simulation"""
         old_state = self.robot.get_position() # on sauvergarde la position actuel du robot
-        self.robot.update() # mise a jour physique du robot
+        now = time.time()
+
+        if self._last_update is None:
+            dt = 0
+        else:
+            dt = now - self._last_update
         self.appliquer_murs() # on verifie les bords de la fenetre
         self.a_collision = self.resoudre_collisions(old_state)  # on verifie collisions avec obstacles
-        return self.a_collision
+        self._last_update = now
