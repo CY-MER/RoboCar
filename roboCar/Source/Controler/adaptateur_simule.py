@@ -74,5 +74,28 @@ class AdaptateurSimule(Adaptateur):
     def get_motor_position(self):
         """lit les encodeurs du robot mock"""
         return self.robot.get_motor_position()
+    def get_distance_parcourue(self):
+        """
+        calcule la distance parcourue a partir des encodeurs
+        """
+        ang_g, ang_d = self.get_motor_position()
+
+        dist_g = (ang_g / 360) * self.robot.WHEEL_CIRCUMFERENCE
+        dist_d = (ang_d / 360) * self.robot.WHEEL_CIRCUMFERENCE
+
+        return (dist_g + dist_d) / 2
+
+    def get_angle_parcouru(self):
+        """
+        calcule la rotation du robot
+        """
+        ang_g, ang_d = self.get_motor_position()
+
+        dist_g = (ang_g / 360) * self.robot.WHEEL_CIRCUMFERENCE
+        dist_d = (ang_d / 360) * self.robot.WHEEL_CIRCUMFERENCE
+
+        angle = (dist_d - dist_g) / self.robot.WHEEL_BASE_WIDTH
+        return angle
+
     def stop(self):
         self.robot.stop()
