@@ -184,5 +184,8 @@ class Simulation:
             dt = now - self._last_update #temps ecoule depuis la derniere mise a jour
         self._last_update = now #on met a jour le moment de la derniere mise a jour
         v, w = self.robot.calculer_vitesse() #calcul la vitesse lineaire et angulaire du robot
+        self.robot.x += v * math.cos(self.robot.angle) * dt #met a jour la position du robot en fonction de sa vitesse et de son orientation
+        self.robot.y += v * math.sin(self.robot.angle) * dt 
+        self.robot.angle += w * dt #met a jour l'orientation du robot en fonction de sa vitesse angulaire
         self.appliquer_murs() # on verifie les bords de la fenetre
         self.a_collision = self.resoudre_collisions(old_state)  # on verifie collisions avec obstacles
