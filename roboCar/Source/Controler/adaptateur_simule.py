@@ -34,6 +34,11 @@ class AdaptateurSimule(Adaptateur):
         self.robot.offset_motor_encoder(self.robot.MOTOR_LEFT, pos_g)
         self.robot.offset_motor_encoder(self.robot.MOTOR_RIGHT, pos_d)
 
+        self.pos_g = 0
+        self.pos_d = 0
+        self._last_update = time.time()
+
+
     def get_position(self):
         return self.x, self.y
 
