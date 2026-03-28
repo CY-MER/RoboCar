@@ -1,8 +1,6 @@
 import math
 from .obstacle import Obstacle
 import time
-
-
 class Simulation:
     """
     Cette classe represente le monde simule
@@ -22,6 +20,8 @@ class Simulation:
         self.hauteur = hauteur
         self.a_collision = False # booleen indiquant si le robot a rencontre un obstacle
         self._last_update = None #garde le moment de la dernière mise à jour de la simulation
+        self._last_distance = 0
+        self._last_angle_parcouru = 0
 
     def distance_obstacle(self, max_range=140): #max_range c'est la portee maximale du capteur (en pixels)
         """
@@ -189,3 +189,4 @@ class Simulation:
         self.robot.angle += w * dt #met a jour l'orientation du robot en fonction de sa vitesse angulaire
         self.appliquer_murs() # on verifie les bords de la fenetre
         self.a_collision = self.resoudre_collisions(old_state)  # on verifie collisions avec obstacles
+        return self.a_collision
