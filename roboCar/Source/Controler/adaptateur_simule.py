@@ -1,5 +1,6 @@
 import math
 from .adaptateur import Adaptateur
+import time
 
 
 class AdaptateurSimule(Adaptateur):
@@ -23,6 +24,9 @@ class AdaptateurSimule(Adaptateur):
         self.vR = 0
         self.largeur = 40
         self.longueur = 50
+        self.pos_g = 0
+        self.pos_d = 0
+        self._last_update = None
 
     def initialise(self):
         """reset des encodeurs moteurs"""
