@@ -95,10 +95,6 @@ class AdaptateurSimule(Adaptateur):
         return self.pos_g, self.pos_d 
 
 
-
-
-    
-
     def get_distance_parcourue(self):
         """
         calcule la distance parcourue a partir des encodeurs
