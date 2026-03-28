@@ -179,6 +179,8 @@ class Simulation:
         old_state = self.robot.get_position() # on sauvergarde la position actuel du robot
         distance_totale = self.robot.get_distance_parcourue() #distance totale parcourue par le robot depuis le debut de la simulation
         angle_total = self.robot.get_angle_parcouru() #angle total parcouru par le robot depuis le debut de la simulation
+        delta_distance = distance_totale - self._last_distance #distance parcourue depuis la dernière mise à jour
+        delta_angle = angle_total - self._last_angle_parcouru #angle parcouru depuis la dernière mise à jour
         self.appliquer_murs() # on verifie les bords de la fenetre
         self.a_collision = self.resoudre_collisions(old_state)  # on verifie collisions avec obstacles
         return self.a_collision
