@@ -164,7 +164,7 @@ class EviterObstacles:
     def stop(self):
         return False
 
-#Mixer les strategies sequencielles avec les condionelles 
+    
 class GestionStrategies:
     """
     Classe qui gere toutes les strategies du robot
