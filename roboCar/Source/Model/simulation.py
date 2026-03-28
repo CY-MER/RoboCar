@@ -181,6 +181,9 @@ class Simulation:
         angle_total = self.robot.get_angle_parcouru() #angle total parcouru par le robot depuis le debut de la simulation
         delta_distance = distance_totale - self._last_distance #distance parcourue depuis la dernière mise à jour
         delta_angle = angle_total - self._last_angle_parcouru #angle parcouru depuis la dernière mise à jour
+        self._last_distance = distance_totale #on met a jour la distance totale parcourue
+        self._last_angle_parcouru = angle_total #on met a jour l'angle total parcouru
+        
         self.appliquer_murs() # on verifie les bords de la fenetre
         self.a_collision = self.resoudre_collisions(old_state)  # on verifie collisions avec obstacles
         return self.a_collision
