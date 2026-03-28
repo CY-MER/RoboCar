@@ -85,7 +85,12 @@ class AdaptateurSimule(Adaptateur):
     def get_motor_position(self):
         """lit les encodeurs du robot mock"""
         now = time.time() #On récupère le temps actuel.
+        if self._last_update is None: #calcule le temps écoulé depuis la dernière mise à jour
+            dt = 0
+        else:
+            dt = now - self._last_update
         
+
 
     
 
