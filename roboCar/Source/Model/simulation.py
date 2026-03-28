@@ -7,7 +7,7 @@ class Simulation:
     Elle contient le robot , les obstacles et les dimensions de la fenêtre
     """
 
-    def __init__(self, largeur, hauteur,robot):
+    def __init__(self, largeur, hauteur,robot,mode):
         self.robot = robot # creation du robot 
         # liste des obstacles presents dans l'environnement
         self.obstacles = [
@@ -22,6 +22,7 @@ class Simulation:
         self._last_update = None #garde le moment de la dernière mise à jour de la simulation
         self._last_distance = 0
         self._last_angle_parcouru = 0
+        self.mode = mode  # "robocar" ou "adaptateur"
 
     def distance_obstacle(self, max_range=140): #max_range c'est la portee maximale du capteur (en pixels)
         """
@@ -178,21 +179,35 @@ class Simulation:
         """Met a jour la simulation"""
         old_state = self.robot.get_position() # on sauvergarde la position actuel du robot
 
-        distance_totale = self.robot.get_distance_parcourue() #distance totale parcourue depuis le debut de la simulation
-        angle_total = self.robot.get_angle_parcouru() #angle total parcouru depuis le debut de la simulation
+        if self.mode == "adaptateur": #si on utilise un adaptateur
+            distance_totale = self.robot.get_distance_parcourue() #distance totale parcourue depuis le debut de la simulation
+            angle_total = self.robot.get_angle_parcouru() #angle total parcouru depuis le debut de la simulation
 
-        delta_distance = distance_totale - self._last_distance #distance parcourue depuis la dernière mise à jour
-        delta_angle = angle_total - self._last_angle_parcouru #angle parcouru depuis la dernière mise à jour
+            delta_distance = distance_totale - self._last_distance #distance parcourue depuis la dernière mise à jour
+            delta_angle = angle_total - self._last_angle_parcouru #angle parcouru depuis la dernière mise à jour
 
-        self._last_distance = distance_totale #on met a jour la distance totale parcourue
-        self._last_angle_parcouru = angle_total #on met a jour l'angle total parcouru
+            self._last_distance = distance_totale #on met a jour la distance totale parcourue
+            self._last_angle_parcouru = angle_total #on met a jour l'angle total parcouru
 
-        self.robot.x += delta_distance * math.cos(self.robot.angle) #on met a jour la position du robot en fonction de la distance parcourue et de l'angle actuel
-        self.robot.y += delta_distance * math.sin(self.robot.angle)
+            self.robot.x += delta_distance * math.cos(self.robot.angle) #on met a jour la position du robot en fonction de la distance parcourue et de l'angle actuel
+            self.robot.y += delta_distance * math.sin(self.robot.angle)
+            self.robot.angle += delta_angle  #mise a jour de l'angle en fonction de l'angle parcouru
 
-        self.robot.angle += delta_angle #mise a jour de l'angle en fonction de l'angle parcouru
+        else:  #robocar
+            now = time.time()  #on calcule le temps ecoule depuis la derniere mise a jour
+            if self._last_update is None:
+                dt = 0.0
+            else:
+                dt = now - self._last_update
+            self._last_update = now
 
-        self.appliquer_murs() # on verifie les bords de la fenetre
+            v, w = self.robot.calculer_vitesse() #on recupere la vitesse lineaire et angulaire
+
+            self.robot.x += v * math.cos(self.robot.angle) * dt #mise a jour de la position avec la vitesse
+            self.robot.y += v * math.sin(self.robot.angle) * dt
+            self.robot.angle += w * dt #mise a jour de l angle
+
+        self.appliquer_murs()  #on verifie les bords de la fenetre
         self.a_collision = self.resoudre_collisions(old_state)  # on verifie collisions avec obstacles
 
         return self.a_collision
