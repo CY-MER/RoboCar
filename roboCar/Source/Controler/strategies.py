@@ -4,7 +4,8 @@ class AvancerXMetres:
     Strategie qui fait avancer le robot d'une distance donnee
     Le robot avance jusqu'a ce que la distance parcourue atteigne la distance demandee (en metres)
     """
-
+    
+    # Supprimer marge_mur, Il faut partir
     def __init__(self, simulation, distance, vitesse, marge_mur=35):
         self.sim = simulation      # reference vers la simulation 
         self.distance = distance   # distance a parcourir en metres
@@ -13,9 +14,11 @@ class AvancerXMetres:
 
         self.depart = None         # position de depart du robot
 
+    #il faut calculer les positions sans self.depart , on a besoin de quelque chose comme get_distance_parcorue 
     def start(self):
         self.depart = None #on reinitialise la position de depart la premiere fois que step() sera appelee
-
+    
+    #On peut pas utiliser get_position, on a besoin de quelque chose comme get_distance_parcorue 
     def step(self):
         if self.depart is None:
             self.depart = self.sim.robot.get_position() # #on enregistre la position actuelle du robot
@@ -26,6 +29,7 @@ class AvancerXMetres:
 
         self.sim.robot.avancer(self.vitesse) #sinon le robot continue d'avancer
 
+    #On a pas access aux coord du robot reel, donc il faut trouver une autre façon calculer la distance
     def stop(self):
         distance_pixels = self.distance * 100 #conversion metres en pixels
         if self.depart is None:
@@ -36,6 +40,7 @@ class AvancerXMetres:
         distance_parcourue = math.sqrt(dx**2 + dy**2)
         return distance_parcourue >= distance_pixels #si la distance voulue es atteinte alors la strategies s'arrete
     
+#Meme principe que les problemes d'AvancerXMetres
 class TournerXDegrees:
     """ Strategie qui fait tourner le robot d'un angle X donnee
     Le robot tourne jusqu'a ce que l'angle parcouru atteigne l'angle demande
@@ -68,7 +73,7 @@ class TournerXDegrees:
         angle_parcouru = abs(self.sim.robot.get_angle() - self.depart) #difference entre angle actuel et angle de depart 
         return angle_parcouru >= self.angle_voulu
         
-        
+#Peut-être il n'a pas besoin de ça, Reculer = Avancer avec une vitesse negative? 
 class Reculer:
     """
     Strategie qui fait reculer le robot sur une distance donnee qui est utilisee quand le robot est bloque
@@ -164,7 +169,7 @@ class EviterObstacles:
     def stop(self):
         return False
 
-    
+#Mix strategie sequentielle et strategie conditionelle 
 class GestionStrategies:
     """
     Classe qui gere toutes les strategies du robot
