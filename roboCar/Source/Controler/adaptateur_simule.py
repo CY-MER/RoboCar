@@ -1,122 +1,71 @@
 import math
 from .adaptateur import Adaptateur
-import time
 
 
 class AdaptateurSimule(Adaptateur):
-    """
-    Adaptateur pour utiliser un robot mock dans la simulation
-    Il garde aussi les infos de position pour pygame
-    """
+    """Adaptateur pour le robot simule
+    ll traduit les vitesses lineaire et angulaire en vitesses des roues"""
 
-    WHEEL_BASE_WIDTH = 117  # distance entre roues
-    WHEEL_DIAMETER = 66.5
-    WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * math.pi
+    def __init__(self, robot):
+        self.robot = robot
+        # anciennes valeurs pour calcul distance
+        x, y = robot.get_position()
+        self.old_x = x
+        self.old_y = y
 
-    def __init__(self, robot, nom="Flash", coordonnees=(400, 300), angle=0):
-        self.robot = robot  # robot mock
-        self.nom = nom
-        # position du robot dans la simulation
-        self.x, self.y = coordonnees
-        self.angle = math.radians(angle)
-        # vitesses des roues
-        self.vG = 0
-        self.vR = 0
-        self.largeur = 40
-        self.longueur = 50
-        self.pos_g = 0
-        self.pos_d = 0
-        self._last_update = None
+        self.old_angle = robot.get_angle()
 
-    def initialise(self):
-        """reset des encodeurs moteurs"""
-        pos_g, pos_d = self.robot.get_motor_position()
-        self.robot.offset_motor_encoder(self.robot.MOTOR_LEFT, pos_g)
-        self.robot.offset_motor_encoder(self.robot.MOTOR_RIGHT, pos_d)
+    def calculer_vitesse(self, v, w):
+        """Convertit v et w en vitesses des roues
+        """
+        vG = v - (w * self.robot.WHEEL_BASE / 2)
+        vR = v + (w * self.robot.WHEEL_BASE / 2)
 
-        self.pos_g = 0
-        self.pos_d = 0
-        self._last_update = time.time()
+        self.robot.vG = vG
+        self.robot.vR = vR
 
-
-    def get_position(self):
-        return self.x, self.y
-
-    def get_angle(self):
-        return self.angle
-
-    def get_wheel_speeds(self):
-        return self.vG, self.vR
-
-    def set_vitesse_gauche(self, vitesse):
-        """met a jour vitesse interne et envoie au robot"""
-        self.vG = vitesse
-        self.robot.set_motor_dps(self.robot.MOTOR_LEFT, vitesse)
-
-    def set_vitesse_droite(self, vitesse):
-        self.vR = vitesse
-        self.robot.set_motor_dps(self.robot.MOTOR_RIGHT, vitesse)
-
-    def avancer(self, vitesse):
-        """avance en ligne droite"""
-        self.set_vitesse_gauche(vitesse)
-        self.set_vitesse_droite(vitesse)
-
-    def reculer(self, vitesse):
-        self.set_vitesse_gauche(-vitesse)
-        self.set_vitesse_droite(-vitesse)
-
-    def arreter(self):
-        self.set_vitesse_gauche(0)
-        self.set_vitesse_droite(0)
-
-    def tourner_sur_place(self, vitesse):
-        self.set_vitesse_gauche(vitesse)
-        self.set_vitesse_droite(-vitesse)
-
-    def tourner_gauche(self, vitesse):
-        self.set_vitesse_gauche(vitesse)
-        self.set_vitesse_droite(0)
-
-    def tourner_droite(self, vitesse):
-        self.set_vitesse_gauche(0)
-        self.set_vitesse_droite(vitesse)
-
-    def get_motor_position(self):
-        """lit les encodeurs du robot mock"""
-        now = time.time() #On récupère le temps actuel.
-        if self._last_update is None: #calcule le temps écoulé depuis la dernière mise à jour
-            dt = 0
-        else:
-            dt = now - self._last_update
-        self._last_update = now # enregistre le nouveau temps de référence
-        self.pos_g += self.vG * dt #faire avancer les encodeurs selon la vitesse des roues
-        self.pos_d += self.vR * dt
-        return self.pos_g, self.pos_d 
-
+    def get_distance(self):
+        """Distance devant le robot"""
+        return self.robot.get_distance()
 
     def get_distance_parcourue(self):
+        """Distance euclidienne parcourue depuis dernier appel.
         """
-        calcule la distance parcourue a partir des encodeurs
-        """
-        ang_g, ang_d = self.get_motor_position()
+        x, y = self.robot.get_position()
 
-        dist_g = (ang_g / 360) * self.robot.WHEEL_CIRCUMFERENCE
-        dist_d = (ang_d / 360) * self.robot.WHEEL_CIRCUMFERENCE
+        dx = x - self.old_x
+        dy = y - self.old_y
 
-        return (dist_g + dist_d) / 2
+        dist = math.sqrt(dx**2 + dy**2)
+
+        self.old_x = x
+        self.old_y = y
+
+        return dist
 
     def get_angle_parcouru(self):
+        """Angle parcouru depuis dernier appel.
         """
-        calcule la rotation du robot
-        """
-        ang_g, ang_d = self.get_motor_position()
+        angle = self.robot.get_angle()
+        d = abs(angle - self.old_angle)
 
-        dist_g = (ang_g / 360) * self.robot.WHEEL_CIRCUMFERENCE
-        dist_d = (ang_d / 360) * self.robot.WHEEL_CIRCUMFERENCE
+        self.old_angle = angle
 
-        angle = (dist_d - dist_g) / self.robot.WHEEL_BASE_WIDTH
-        return angle
+        return d
 
-    def stop(self):
-        self.robot.stop()
+    def avancer(self, vitesse):
+        """Avancer tout droit"""
+        self.calculer_vitesse(vitesse, 0)
+
+    def reculer(self, vitesse):
+        """Reculer"""
+        self.calculer_vitesse(-vitesse, 0)
+
+    def arreter(self):
+        """Stop"""
+        self.robot.vG = 0
+        self.robot.vR = 0
+
+    def tourner_sur_place(self, vitesse):
+        """Rotation sur place"""
+        self.calculer_vitesse(0, vitesse)
