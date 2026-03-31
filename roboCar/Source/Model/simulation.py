@@ -13,6 +13,10 @@ class Simulation:
             Obstacle("rectangle", (500, 200), (100, 50)),
             Obstacle("rectangle", (300, 450), (50, 50)),
         ]
+        self.obstacles[0].pos_aleatoire()
+        self.obstacles[1].pos_aleatoire()
+        self.obstacles[2].pos_aleatoire()
+
 
     def collision(self, x, y, longueur, largeur):
         """Verifie si il y a collision avec un mur ou un obstacle
