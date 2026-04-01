@@ -1,12 +1,11 @@
 from .Model.simulation import Simulation
 from .Model.robocar import RoboCar
-from .Model.obstacle import Obstacle
 from .Controler.strategies import (
     AvancerXMetres,
     TournerXDegrees,
-    Sequence,
-    Condition,
-    Boucle
+    Reculer,
+    EviterObstacles,
+    GestionStrategies
 )
 from .View_2D.affichage import Affichage
 

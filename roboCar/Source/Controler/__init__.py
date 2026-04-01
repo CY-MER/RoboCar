@@ -2,9 +2,9 @@
 from .strategies import (
     AvancerXMetres,
     TournerXDegrees,
-    Sequence,
-    Condition,
-    Boucle
+    Reculer,
+    EviterObstacles,
+    GestionStrategies
 )
 from .adaptateur import Adaptateur
 from .adaptateur_simule import AdaptateurSimule

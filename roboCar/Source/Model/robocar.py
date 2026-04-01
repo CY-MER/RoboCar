@@ -1,78 +1,125 @@
 import math
-
+import time
+from .obstacle import Polygone
+from .vecteur import Vecteur
 
 class RoboCar:
-    """Classe du robot simule
-    """
-    WHEEL_BASE = 50
-    PAS = 0.5  #taille du pas de deplacement (controle la vitesse globale)
+    WHEEL_BASE = 50  # distance entre roues
+    PORTEE_CAPTEURS = 100 # portee des capteurs de distance
 
-    def __init__(self, nom, coordonnees, angle, simulation=None):
+    def __init__(self, nom, coordonnees, angle):
         self.nom = nom
-        self.x, self.y = coordonnees
-        self.angle = math.radians(angle)
+        self.x, self.y = coordonnees #coordonne du centre du robot
+        self.angle = math.radians(angle) #orientation
+        self.angle_tete = 0 #angle de la tete du robot (relative au corps, 0 = meme angle) sur lequel est monté le capteur de distance et la camera
 
         # vitesses roues
-        self.vG = 0
-        self.vR = 0
-
-        self.largeur = 40
-        self.longueur = 50
-
-        self.simulation = simulation #reference vers le monde
-
+        self.vG = 0 #vitesse roue gauche
+        self.vR = 0 #vitesse roue droite
+        self.largeur = 40   # largeur (cote roues)
+        self.longueur = 50  # longueur (avant/arriere)
+        self._last_update = None #memoire du dernier moment ou le robot a ete mis a jour
+    
     def get_position(self):
-        """Retourne (x, y)"""
+        """Recuperer les coord du robot"""
         return self.x, self.y
-
+    
+    def get_position_tete(self):
+        """Recuperer les coord de la tete du robot (à l'avant)"""
+        tete_x = self.x + math.cos(self.angle) * self.longueur / 2
+        tete_y = self.y + math.sin(self.angle) * self.longueur / 2
+        return tete_x, tete_y
+    
     def get_angle(self):
-        """Retourne l'angle du robot"""
+        """Recuperer l'etat du robot"""
         return self.angle
-
+    
+    def get_angle_tete(self):
+        """Recuperer l'angle total de la tete du robot"""
+        return (self.angle + self.angle_tete) % (2*math.pi)
+    
+    def get_wheel_speeds(self):
+        return self.vG, self.vR
+        
+    def set_vitesse_gauche(self, v):
+        """Modifier la vitesse du roue gauche"""
+        self.vG = v
+        
+    def set_vitesse_droite(self, v):
+        """Modifier la vitesse du roue droite"""
+        self.vR = v
+        
     def calculer_vitesse(self):
-        """On calcule la vitesse lineaire et angulaire
-        """
+        """Cette fonction calcule la vitesse lineaire et angulaire"""
         v = (self.vR + self.vG) / 2
-        w = (self.vR - self.vG) / self.WHEEL_BASE
+        w = (self.vR - self.vG) / self.WHEEL_BASE #c'est le theoreme de Thales applique au cercle de rotation
         return v, w
-
-    def update(self, v, w):
-        """On retourne les prochaines valeurs de x,y,angle
+    
+    def avancer(self, vitesse):
+        """Fait avancer le robot tout droit.
         """
-        next_x = self.x + v * math.cos(self.angle) * self.PAS
-        next_y = self.y + v * math.sin(self.angle) * self.PAS
-        next_angle = self.angle + w * self.PAS
+        self.set_vitesse_gauche(vitesse) #les deux roues doivent avoir la memee vitesse pour avancer en ligne droite
+        self.set_vitesse_droite(vitesse)
 
-        return next_x, next_y, next_angle
-
-    def appliquer(self, x, y, angle):
-        """Applique le nouvel etat calcule
+    def reculer(self, vitesse):
+        """Fait reculer le robot
         """
-        self.x = x
-        self.y = y
-        self.angle = angle
-
-    def step(self):
-        """On fait une mise a jour complete 
+        self.set_vitesse_gauche(-vitesse)
+        self.set_vitesse_droite(-vitesse)
+        
+    def arreter(self): #deceleration correspond a l'intensite du freinage
+        """Reduit la vitesse du robot à 0
         """
+        self.set_vitesse_droite(0)
+        self.set_vitesse_gauche(0)
+           
+    def tourner_sur_place(self, vitesse):
+        """Fait tourner le robot sur lui-même
+        """
+        self.set_vitesse_gauche(vitesse) #Une roue avance et l'autre recule
+        self.set_vitesse_droite(-vitesse)
+
+    def tourner_gauche(self, vitesse):
+        """
+        Fait tourner le robot vers la gauche 
+        """
+        self.set_vitesse_gauche(vitesse)
+        self.set_vitesse_droite(0)
+
+    def tourner_droite(self, vitesse):
+        """
+        Fait tourner le robot vers la droite 
+        """
+        self.set_vitesse_gauche(0)
+        self.set_vitesse_droite(vitesse)
+
+    def tourner_tete(self, angle):
+        """ Tourne la tete du robot à l'angle en degrés angle (positif = gauche, negatif = droite)"""
+        # rappel, l'angle de la tete est relatif au corps du robot (0 = meme angle que le corps)
+        self.angle_tete = math.radians(angle)
+
+    def update(self):
+        """Mise a jour du robot"""
+        now = time.time() #le temps actuel en secondes
+        if self._last_update is None:
+            dt = 0.0
+        else:
+            dt = now - self._last_update #le temps ecoule depuis la derniere mise a jour
+        self._last_update = now #on sauvegarde le moment actuel
+
         v, w = self.calculer_vitesse()
-        next_x, next_y, next_angle = self.update(v, w)
-
-        if not self.simulation.collision(next_x, next_y, self.longueur, self.largeur):
-            self.appliquer(next_x, next_y, next_angle)
-            return True
-
-        return False
-
-    def get_distance(self, max_range=120, pas=5):
-        """
-        Mesure la distance devant le robot jusqu'au premier obstacle
-        """
-        for d in range(0, max_range, pas):
-            x = self.x + math.cos(self.angle) * d
-            y = self.y + math.sin(self.angle) * d
-
-            if self.simulation.collision(x, y, self.longueur, self.largeur):
-                return d
-
-        return max_range
+        self.x += v * math.cos(self.angle) * dt #on multiplie par dt pour prendre en compte le temps ecoule
+        self.y += v * math.sin(self.angle) * dt
+        self.angle += w * dt #plus dt est grand plus il tourne longtemps
+        #si w<0 on tourne a droite et a gauche sinon
+    
+    def get_forme_robot(self)->Polygone:
+        """ renvoie le quadrilatère représentant la hitbox du robot en fonction de sa position et de sa rotation """
+        # points du robot avant rotation et translation (centrés sur l'origine)
+        L2 = self.longueur / 2 ; W2 = self.largeur / 2
+        vecteurs = [Vecteur(-L2, -W2), Vecteur(L2, -W2), Vecteur(L2, W2), Vecteur(-L2, W2)]
+        points = [] # points calculés
+        for vec in vecteurs:
+            vec_rot = vec.rotation(math.degrees(self.angle)) # rotation du segment
+            points.append(Vecteur(vec_rot.x + self.x, vec_rot.y + self.y))
+        return Polygone(points)

@@ -1,79 +1,88 @@
 import unittest
+import time
 
-from Source import Simulation, Obstacle
+from Source.Model import RoboCar, Simulation
 
 
 class TestSimulation(unittest.TestCase):
+
     def setUp(self):
-        """Cree un monde simple avant chaque test"""
-        self.sim = Simulation(800, 600)
+        self.robot = RoboCar("Flash", (400, 300), 0)
+        self.sim = Simulation(800, 600, self.robot, mode="robocar")
 
     def test_initialisation(self):
-        """Verifie que les dimensions et les obstacles sont bien initialises"""
+        """Verifie les dimensions et la creation du robot"""
         self.assertEqual(self.sim.largeur, 800)
         self.assertEqual(self.sim.hauteur, 600)
+        self.assertIsNotNone(self.sim.robot)
         self.assertEqual(len(self.sim.obstacles), 3)
+        self.assertEqual(self.sim.mode, "robocar")
 
-    def test_collision_retourne_bool(self):
-        """Verifie que collision() retourne bien un booleen"""
-        resultat = self.sim.collision(400, 300, 50, 40)
+    def test_distance_obstacle_positive(self):
+        """La distance a un obstacle doit etre positive"""
+        dist = self.sim.distance_obstacle()
+        self.assertGreaterEqual(dist, 0)
+
+    def test_distance_mur_positive(self):
+        """La distance au mur doit etre positive"""
+        dist = self.sim.distance_mur()
+        self.assertGreaterEqual(dist, 0)
+
+    def test_distance_cote_gauche_positive(self):
+        """La distance a gauche doit etre positive"""
+        dist = self.sim.distance_cote_gauche()
+        self.assertGreaterEqual(dist, 0)
+
+    def test_distance_cote_droite_positive(self):
+        """La distance a droite doit etre positive"""
+        dist = self.sim.distance_cote_droite()
+        self.assertGreaterEqual(dist, 0)
+
+    def test_obtenir_rectangle(self):
+        """Le rectangle du robot doit contenir 4 valeurs"""
+        rect = self.sim.obtenir_rectangle()
+        self.assertEqual(len(rect), 4)
+
+    def test_collision_type(self):
+        """collision() doit retourner un booleen"""
+        obs = self.sim.obstacles[0]
+        resultat = self.sim.collision(obs)
         self.assertIsInstance(resultat, bool)
 
-    def test_pas_de_collision_au_centre(self):
-        """Verifie qu'un robot place dans une zone libre ne collisionne pas forcement"""
-        sim = Simulation(800, 600, obstacles=[])
-        resultat = sim.collision(400, 300, 50, 40)
-        self.assertFalse(resultat)
+    def test_appliquer_murs(self):
+        """Le robot ne doit pas sortir des limites apres appliquer_murs()"""
+        self.sim.robot.x = -100
+        self.sim.robot.y = -100
 
-    def test_collision_avec_mur_gauche(self):
-        """Verifie qu'il y a collision si le robot sort par la gauche"""
-        resultat = self.sim.collision(10, 300, 50, 40)
-        self.assertTrue(resultat)
+        self.sim.appliquer_murs()
 
-    def test_collision_avec_mur_droit(self):
-        """Verifie qu'il y a collision si le robot sort par la droite"""
-        resultat = self.sim.collision(790, 300, 50, 40)
-        self.assertTrue(resultat)
+        self.assertGreaterEqual(self.sim.robot.x, self.sim.robot.longueur / 2)
+        self.assertGreaterEqual(self.sim.robot.y, self.sim.robot.largeur / 2)
 
-    def test_collision_avec_mur_haut(self):
-        """Verifie qu'il y a collision si le robot sort par le haut"""
-        resultat = self.sim.collision(400, 10, 50, 40)
-        self.assertTrue(resultat)
+    def test_resoudre_collisions_retourne_bool(self):
+        """resoudre_collisions() doit retourner un booleen"""
+        old_state = self.sim.robot.get_position()
+        resultat = self.sim.resoudre_collisions(old_state)
+        self.assertIsInstance(resultat, bool)
 
-    def test_collision_avec_mur_bas(self):
-        """Verifie qu'il y a collision si le robot sort par le bas"""
-        resultat = self.sim.collision(400, 590, 50, 40)
-        self.assertTrue(resultat)
+    def test_update_retourne_bool(self):
+        """update() doit retourner un booleen"""
+        self.sim._last_update = time.time()
+        resultat = self.sim.update()
+        self.assertIsInstance(resultat, bool)
 
-    def test_collision_avec_obstacle(self):
-        """Verifie qu'il y a collision si le robot recouvre un obstacle"""
-        sim = Simulation(
-            800,
-            600,
-            obstacles=[Obstacle("rectangle", (100, 100), (80, 100))]
-        )
-        #centre du robot place sur l'obstacle
-        resultat = sim.collision(140, 150, 50, 40)
-        self.assertTrue(resultat)
+    def test_update_fait_bouger_le_robot(self):
+        """update() doit faire avancer le robot si une vitesse est definie"""
+        self.sim.robot.avancer(20)
 
-    def test_pas_de_collision_avec_obstacle_loin(self):
-        """Verifie qu'il n'y a pas collision si le robot est loin de l'obstacle"""
-        sim = Simulation(
-            800,
-            600,
-            obstacles=[Obstacle("rectangle", (100, 100), (80, 100))]
-        )
-        resultat = sim.collision(400, 300, 50, 40)
-        self.assertFalse(resultat)
+        self.sim._last_update = time.time() - 1
+        ancien_x = self.sim.robot.x
+        ancien_y = self.sim.robot.y
 
-    def test_liste_obstacles_personnalisee(self):
-        """Verifie qu'on peut fournir une liste d'obstacles personnalisee"""
-        obstacles = [
-            Obstacle("rectangle", (50, 50), (20, 20)),
-            Obstacle("rectangle", (200, 200), (30, 30))
-        ]
-        sim = Simulation(800, 600, obstacles=obstacles)
-        self.assertEqual(len(sim.obstacles), 2)
+        self.sim.update()
+
+        self.assertGreater(self.sim.robot.x, ancien_x)
+        self.assertAlmostEqual(self.sim.robot.y, ancien_y, delta=1.0)
 
 
 if __name__ == "__main__":
