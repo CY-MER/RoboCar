@@ -21,7 +21,8 @@ class TestSimulation(unittest.TestCase):
 
     def test_pas_de_collision_au_centre(self):
         """Verifie qu'un robot place dans une zone libre ne collisionne pas forcement"""
-        sim = Simulation(800, 600, obstacles=[])
+        sim = Simulation(800, 600)
+        sim.obstacles = []
         resultat = sim.collision(400, 300, 50, 40)
         self.assertFalse(resultat)
 
@@ -47,32 +48,28 @@ class TestSimulation(unittest.TestCase):
 
     def test_collision_avec_obstacle(self):
         """Verifie qu'il y a collision si le robot recouvre un obstacle"""
-        sim = Simulation(
-            800,
-            600,
-            obstacles=[Obstacle("rectangle", (100, 100), (80, 100))]
-        )
-        #centre du robot place sur l'obstacle
+        sim = Simulation(800, 600)
+        sim.obstacles = [Obstacle("rectangle", (100, 100), (80, 100))]
+
+        # centre du robot place sur l'obstacle
         resultat = sim.collision(140, 150, 50, 40)
         self.assertTrue(resultat)
 
     def test_pas_de_collision_avec_obstacle_loin(self):
         """Verifie qu'il n'y a pas collision si le robot est loin de l'obstacle"""
-        sim = Simulation(
-            800,
-            600,
-            obstacles=[Obstacle("rectangle", (100, 100), (80, 100))]
-        )
+        sim = Simulation(800, 600)
+        sim.obstacles = [Obstacle("rectangle", (100, 100), (80, 100))]
         resultat = sim.collision(400, 300, 50, 40)
         self.assertFalse(resultat)
 
     def test_liste_obstacles_personnalisee(self):
-        """Verifie qu'on peut fournir une liste d'obstacles personnalisee"""
+        """Verifie qu'on peut remplacer la liste d'obstacles"""
         obstacles = [
             Obstacle("rectangle", (50, 50), (20, 20)),
             Obstacle("rectangle", (200, 200), (30, 30))
         ]
-        sim = Simulation(800, 600, obstacles=obstacles)
+        sim = Simulation(800, 600)
+        sim.obstacles = obstacles
         self.assertEqual(len(sim.obstacles), 2)
 
 

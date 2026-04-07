@@ -48,12 +48,12 @@ class TestRoboCar(unittest.TestCase):
         """Verifie que update(v, w) calcule le prochain etat sans modifier directement le robot"""
         next_x, next_y, next_angle = self.robot.update(10, 0)
 
-        # le robot ne doit pas encore avoir bouge
+        #le robot ne doit pas encore avoir bouge
         self.assertEqual(self.robot.x, 100)
         self.assertEqual(self.robot.y, 200)
         self.assertEqual(self.robot.angle, 0)
 
-        # mais la position calculee doit etre correcte
+        #mais la position calculee doit etre correcte
         self.assertAlmostEqual(next_x, 100 + 10 * self.robot.PAS)
         self.assertAlmostEqual(next_y, 200)
         self.assertAlmostEqual(next_angle, 0)
@@ -76,7 +76,7 @@ class TestRoboCar(unittest.TestCase):
 
     def test_step_avec_collision_mur(self):
         """Verifie que step() retourne False si le robot va heurter un mur"""
-        # on place le robot tres pres du bord droit
+        #on place le robot tres pres du bord droit
         self.robot.x = 780
         self.robot.y = 200
         self.robot.vG = 10
