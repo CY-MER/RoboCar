@@ -17,7 +17,8 @@ from Source import (
 class TestStrategies(unittest.TestCase):
     def setUp(self):
         """Cree un monde vide un robot et un adaptateur avant chaque test"""
-        self.sim = Simulation(800, 600, obstacles=[])
+        self.sim = Simulation(800, 600)
+        self.sim.obstacles = []
         self.robot = RoboCar("Flash", (400, 300), 0, simulation=self.sim)
         self.adp = AdaptateurSimule(self.robot)
 
@@ -58,11 +59,10 @@ class TestStrategies(unittest.TestCase):
         self.assertTrue(strat.stop())
 
     def test_avancer_x_metres_arrete_si_termine(self):
-        """Verifie que step() arrete le robot si la strategie est deja terminee."""
+        """Verifie que step() arrete le robot si la strategie est deja terminee"""
         strat = AvancerXMetres(self.adp, distance=10, vitesse=2)
         strat.start()
         strat.distance_parcourue = 10
-        #on met des vitesses non nulles avant
         self.robot.vG = 5
         self.robot.vR = 5
         strat.step()
@@ -71,20 +71,20 @@ class TestStrategies(unittest.TestCase):
 
     def test_tourner_x_degrees_start_reset(self):
         """Verifie que start() remet l'angle parcouru a zero"""
-        strat = TournerXDegrees(self.adp, angle=90, vitesse=0.1)
+        strat = TournerXDegrees(self.adp, angle=90, vitesse_angulaire=0.1)
         strat.angle_parcouru = 99
         strat.start()
         self.assertEqual(strat.angle_parcouru, 0)
 
     def test_tourner_x_degrees_pas_termine_au_debut(self):
         """Verifie que la strategie n'est pas terminee juste apres start()"""
-        strat = TournerXDegrees(self.adp, angle=90, vitesse=0.1)
+        strat = TournerXDegrees(self.adp, angle=90, vitesse_angulaire=0.1)
         strat.start()
         self.assertFalse(strat.stop())
 
     def test_tourner_x_degrees_commande_rotation(self):
         """Verifie que step() donne une commande de rotation sur place"""
-        strat = TournerXDegrees(self.adp, angle=90, vitesse=0.1)
+        strat = TournerXDegrees(self.adp, angle=90, vitesse_angulaire=0.1)
         strat.start()
         strat.step()
         self.assertNotEqual(self.robot.vG, self.robot.vR)
@@ -92,14 +92,14 @@ class TestStrategies(unittest.TestCase):
 
     def test_tourner_x_degrees_termine_si_angle_atteint(self):
         """Verifie que stop() retourne True si l'angle cible est atteint"""
-        strat = TournerXDegrees(self.adp, angle=90, vitesse=0.1)
+        strat = TournerXDegrees(self.adp, angle=90, vitesse_angulaire=0.1)
         strat.start()
         strat.angle_parcouru = math.radians(90)
         self.assertTrue(strat.stop())
 
     def test_tourner_x_degrees_arrete_si_termine(self):
         """Verifie que step() arrete le robot si la strategie est deja terminee"""
-        strat = TournerXDegrees(self.adp, angle=90, vitesse=0.1)
+        strat = TournerXDegrees(self.adp, angle=90, vitesse_angulaire=0.1)
         strat.start()
         strat.angle_parcouru = math.radians(90)
         self.robot.vG = 4
@@ -123,7 +123,6 @@ class TestStrategies(unittest.TestCase):
         s2 = TournerXDegrees(self.adp, 45, 0.1)
         seq = Sequence([s1, s2])
         seq.start()
-        #on force la premiere strategie a etre terminee
         s1.distance_parcourue = 5
         seq.step()
         self.assertEqual(seq.i, 1)
@@ -143,12 +142,16 @@ class TestStrategies(unittest.TestCase):
         self.assertFalse(seq.stop())
 
     def test_condition_choisit_s1_si_obstacle_proche(self):
-        """Verifie que la condition choisit s1 si la distance detectee est inferieure au seuil"""
-        #obstacle juste devant le robot
+        """Verifie que la condition choisit s1 si un obstacle proche est detecte"""
         self.sim.obstacles.append(Obstacle("rectangle", (430, 280), (40, 40)))
+
         s1 = TournerXDegrees(self.adp, 20, 0.1)
         s2 = AvancerXMetres(self.adp, 5, 2)
-        cond = Condition(s1, s2, self.adp, 50)
+
+        def obstacle_proche(adaptateur):
+            return adaptateur.get_distance() < 50
+
+        cond = Condition(s1, s2, self.adp, obstacle_proche)
         cond.start()
         cond.step()
         self.assertIs(cond.current, s1)
@@ -157,7 +160,11 @@ class TestStrategies(unittest.TestCase):
         """Verifie que la condition choisit s2 si aucun obstacle proche n'est detecte"""
         s1 = TournerXDegrees(self.adp, 20, 0.1)
         s2 = AvancerXMetres(self.adp, 5, 2)
-        cond = Condition(s1, s2, self.adp, 20)
+
+        def obstacle_proche(adaptateur):
+            return adaptateur.get_distance() < 20
+
+        cond = Condition(s1, s2, self.adp, obstacle_proche)
         cond.start()
         cond.step()
         self.assertIs(cond.current, s2)
@@ -166,7 +173,11 @@ class TestStrategies(unittest.TestCase):
         """Verifie qu'une condition ne s'arrete jamais toute seule"""
         s1 = TournerXDegrees(self.adp, 20, 0.1)
         s2 = AvancerXMetres(self.adp, 5, 2)
-        cond = Condition(s1, s2, self.adp, 20)
+
+        def obstacle_proche(adaptateur):
+            return adaptateur.get_distance() < 20
+
+        cond = Condition(s1, s2, self.adp, obstacle_proche)
         self.assertFalse(cond.stop())
 
     def test_boucle_start_demarre_la_strategie(self):
@@ -181,9 +192,8 @@ class TestStrategies(unittest.TestCase):
         strat = AvancerXMetres(self.adp, 5, 2)
         boucle = Boucle(strat)
         boucle.start()
-        strat.distance_parcourue = 5  #force stop() a True
+        strat.distance_parcourue = 5
         boucle.step()
-        #si restart a bien eu lieu, la distance est reinitialisee puis step relance un mouvement
         self.assertLessEqual(strat.distance_parcourue, 5)
 
     def test_boucle_stop_retourne_false(self):
