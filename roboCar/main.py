@@ -1,6 +1,6 @@
 from Source import Simulation, Affichage, RoboCar
 from Source import AdaptateurSimule
-from Source import creer_strategie, Faire_Hexagone
+from Source import creer_strategie, Faire_Hexagone, Faire_Carre, Allez_retour
 import time
 import random
 
@@ -10,15 +10,15 @@ HAUTEUR = 600
 
 def main():
     sim = Simulation(LARGEUR, HAUTEUR) #creation du monde
-    robot1 = RoboCar("Flash1", (30, 270), 0, simulation=sim) #creation du robot
-    robot2 = RoboCar("Flash2", (870, 270), 180, simulation=sim) #creation du robot
+    robot1 = RoboCar("Flash1", (40, 270), 0, simulation=sim) #creation du robot
+    robot2 = RoboCar("Flash2", (860, 270), 90, simulation=sim) #creation du robot
     adp1 = AdaptateurSimule(robot1) #adaptateur de pilotage
     adp2 = AdaptateurSimule(robot2)
     view = Affichage(LARGEUR, HAUTEUR) #affichage
 
-    strat1 = creer_strategie(adp1)
+    strat1 = Faire_Carre(adp1)
     strat1.start()
-    strat2 = creer_strategie(adp2)
+    strat2 = Allez_retour(adp2)
     strat2.start()
 
     running = True

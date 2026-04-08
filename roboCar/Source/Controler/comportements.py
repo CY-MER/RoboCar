@@ -27,3 +27,11 @@ def creer_strategie(adaptateur):
 def Faire_Hexagone(adaptateur):
     """ robot fait un hexagone """
     return Sequence([AvancerXMetres(adaptateur, 50, 2), TournerXDegrees(adaptateur, 58, 0.1)] * 6)
+
+def Faire_Carre(adaptateur):
+    """ robot fait un carre """
+    return Sequence([AvancerXMetres(adaptateur, 100, 2), TournerXDegrees(adaptateur, 87, 0.1)] * 4)
+
+def Allez_retour(adaptateur):
+    """ faire des allez_retours """
+    return Sequence([AvancerXMetres(adaptateur, 100, 2), TournerXDegrees(adaptateur, 176, 0.1)] * 8)
