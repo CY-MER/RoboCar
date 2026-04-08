@@ -3,13 +3,13 @@ from Source import AdaptateurSimule
 from Source import creer_strategie
 import time
 
-LARGEUR = 800
+LARGEUR = 900
 HAUTEUR = 600
 
 
 def main():
     sim = Simulation(LARGEUR, HAUTEUR) #creation du monde
-    robot = RoboCar("Flash", (400, 300), 0, simulation=sim) #creation du robot
+    robot = RoboCar("Flash", (870, 570), 180, simulation=sim) #creation du robot
     adp = AdaptateurSimule(robot) #adaptateur de pilotage
     view = Affichage(LARGEUR, HAUTEUR) #affichage
     strat = creer_strategie(adp) #creation de la strategie globale

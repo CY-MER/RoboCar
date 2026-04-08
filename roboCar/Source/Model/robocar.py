@@ -21,6 +21,9 @@ class RoboCar:
 
         self.simulation = simulation #reference vers le monde
 
+        self.crayon_dessine = True #trace tme_solo
+        self.all_trace = [] #ensemble de points tracés
+
     def get_position(self):
         """Retourne (x, y)"""
         return self.x, self.y

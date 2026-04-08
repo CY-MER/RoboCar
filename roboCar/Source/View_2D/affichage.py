@@ -45,9 +45,17 @@ class Affichage:
 
     def draw_obstacles(self, obstacles):
         """Dessine les obstacles"""
-
         for obs in obstacles:
             pygame.draw.rect(self.screen, (200, 0, 0), (*obs.pos, *obs.dim))
+
+    def trace_robot(self, robot):
+        """ Robot laisse une trace derriere lui (TME_SLO) """
+        if robot.crayon_dessine:
+            robot.all_trace.append(robot.get_position())
+        
+        for x, y in robot.all_trace: #dessine toute les traces a chaque frame
+            pygame.draw.circle(self.screen, (0, 0, 255), (int(x), int(y)), 1)
+
     def update(self, robot, obstacles):
         """Met a jour l'affichage et gere les evenements"""
 
@@ -57,11 +65,12 @@ class Affichage:
             if event.type == pygame.QUIT:
                 running = False
 
-        self.screen.fill((0, 0, 0))
+        self.screen.fill((255, 255, 255))
+
+        self.trace_robot(robot) #trace du robot
 
         self.draw_robot(robot)
         self.draw_obstacles(obstacles)
-
         pygame.display.update()
 
         return running

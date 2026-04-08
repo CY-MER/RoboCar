@@ -9,9 +9,9 @@ class Simulation:
         self.largeur = largeur #largeur de la fenetre
         self.hauteur = hauteur #hauteur de la fenetre
         self.obstacles = [
-            Obstacle("rectangle", (380,0), (60, 40)),
-            Obstacle("rectangle", (380,260), (60, 40)),
-            Obstacle("rectangle", (380,560), (60, 40)),
+            Obstacle("rectangle", (430,0), (60, 40)),
+            Obstacle("rectangle", (430,260), (60, 40)),
+            Obstacle("rectangle", (430,560), (60, 40)),
         ]
         """self.obstacles[0].pos_aleatoire()
         self.obstacles[1].pos_aleatoire()
