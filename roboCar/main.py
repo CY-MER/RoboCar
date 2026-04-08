@@ -10,25 +10,32 @@ HAUTEUR = 600
 
 def main():
     sim = Simulation(LARGEUR, HAUTEUR) #creation du monde
-    robot = RoboCar("Flash", (770, 570), 180, simulation=sim) #creation du robot
-    adp = AdaptateurSimule(robot) #adaptateur de pilotage
+    robot1 = RoboCar("Flash1", (30, 270), 0, simulation=sim) #creation du robot
+    robot2 = RoboCar("Flash2", (870, 270), 180, simulation=sim) #creation du robot
+    adp1 = AdaptateurSimule(robot1) #adaptateur de pilotage
+    adp2 = AdaptateurSimule(robot2)
     view = Affichage(LARGEUR, HAUTEUR) #affichage
 
-    strat = Faire_Hexagone(adp) #comportement hexagonal
-    strat.start()
-
-    robot.dessine(True)
+    strat1 = creer_strategie(adp1)
+    strat1.start()
+    strat2 = creer_strategie(adp2)
+    strat2.start()
 
     running = True
     while running:
-        if strat.step(): #execution d'un pas de strategie (check si on passe a la suivante)
-            robot.change_couleur((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+        if strat1.step(): #execution d'un pas de strategie (check si on passe a la suivante)
+            robot1.change_couleur((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
         #mise a jour physique du robot
-        if not robot.step():
-            adp.arreter()
+        if not robot1.step():
+            adp1.arreter()
+
+        if strat2.step():
+            robot2.change_couleur((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
+        if not robot2.step():
+            adp2.arreter()
 
         #affichage
-        running = view.update(robot, sim.obstacles)
+        running = view.update([robot1, robot2], sim.obstacles)
 
         time.sleep(0.01)
 

@@ -21,7 +21,7 @@ class RoboCar:
 
         self.simulation = simulation #reference vers le monde
 
-        self.crayon_dessine = False #crayon robot
+        self.crayon_dessine = True #crayon robot
         self.all_trace = [] #ensemble de points tracés
         self.couleur_cray = (0, 0, 255) #couleur du crayon
 
