@@ -61,13 +61,15 @@ class Sequence:
             self.strategies[0].start()
     def step(self):
         if self.stop(): #si toutes les strategies sont finies on ne fait rien
-            return
+            return False
         strat = self.strategies[self.i] #strategie actuelle
         strat.step() #execution d'un pas
         if strat.stop(): #si la strategie est terminee on passe a la suivante
             self.i += 1
             if not self.stop(): #si il reste des strategies on start la suivante
                 self.strategies[self.i].start()
+                return True #nouvelle strat
+        return False
 
     def stop(self):
         return self.i >= len(self.strategies) #True si toutes les strategies ont ete executees

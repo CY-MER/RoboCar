@@ -51,10 +51,10 @@ class Affichage:
     def trace_robot(self, robot):
         """ Robot laisse une trace derriere lui (TME_SLO) """
         if robot.crayon_dessine:
-            robot.all_trace.append(robot.get_position())
+            robot.all_trace.append((robot.get_position(),robot.couleur_cray))
         
-        for x, y in robot.all_trace: #dessine toute les traces a chaque frame
-            pygame.draw.circle(self.screen, robot.couleur_cray, (x,y), 1)
+        for coord, coul in robot.all_trace: #dessine toute les traces a chaque frame
+            pygame.draw.circle(self.screen, coul, coord, 1)
 
     def update(self, robot, obstacles):
         """Met a jour l'affichage et gere les evenements"""

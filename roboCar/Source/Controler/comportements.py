@@ -23,3 +23,7 @@ def creer_strategie(adaptateur):
         Boucle(reaction)
     ])
     return strat
+
+def Faire_Hexagone(adaptateur):
+    """ robot fait un hexagone """
+    return Sequence([AvancerXMetres(adaptateur, 50, 2), TournerXDegrees(adaptateur, 58, 0.1)] * 6)
