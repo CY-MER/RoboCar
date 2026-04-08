@@ -23,10 +23,15 @@ class RoboCar:
 
         self.crayon_dessine = False #crayon robot
         self.all_trace = [] #ensemble de points tracés
+        self.couleur_cray = (0, 0, 255) #couleur du crayon
 
     def dessine(self, b:bool):
         """ active ou desactive le crayon du robot """
         self.crayon_dessine = b;
+
+    def change_couleur(self, couleur):
+        """ change la couleur du crayon """
+        self.couleur_cray = couleur
 
     def get_position(self):
         """Retourne (x, y)"""

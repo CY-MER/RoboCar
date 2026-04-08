@@ -14,6 +14,9 @@ def main():
     view = Affichage(LARGEUR, HAUTEUR) #affichage
     strat = creer_strategie(adp) #creation de la strategie globale
     strat.start()
+
+    robot.dessine(True)
+
     running = True
     while running:
         strat.step() #execution d'un pas de strategie

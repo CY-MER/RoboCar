@@ -54,7 +54,7 @@ class Affichage:
             robot.all_trace.append(robot.get_position())
         
         for x, y in robot.all_trace: #dessine toute les traces a chaque frame
-            pygame.draw.circle(self.screen, (0, 0, 255), (int(x), int(y)), 1)
+            pygame.draw.circle(self.screen, robot.couleur_cray, (x,y), 1)
 
     def update(self, robot, obstacles):
         """Met a jour l'affichage et gere les evenements"""
