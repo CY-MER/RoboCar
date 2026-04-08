@@ -48,6 +48,10 @@ class Affichage:
         for obs in obstacles:
             pygame.draw.rect(self.screen, (200, 0, 0), (*obs.pos, *obs.dim))
 
+    def draw_ballon(self, ballon):
+        """Dessine le ballon"""
+        pygame.draw.circle(self.screen, (255, 0, 0), (ballon.x, ballon.y), ballon.rayon)
+
     def trace_robot(self, robot):
         """ Robot laisse une trace derriere lui (TME_SLO) """
         if robot.crayon_dessine:
@@ -56,7 +60,7 @@ class Affichage:
         for coord, coul in robot.all_trace: #dessine toute les traces a chaque frame
             pygame.draw.circle(self.screen, coul, coord, 1)
 
-    def update(self, liste_robot, obstacles):
+    def update(self, liste_robot, obstacles, ballon=None):
         """Met a jour l'affichage et gere les evenements"""
 
         running = True
@@ -67,6 +71,9 @@ class Affichage:
 
         self.screen.fill((255, 255, 255))
 
+        if ballon: #dessine le ballon si on en a un
+            self.draw_ballon(ballon)
+            
         for robot in liste_robot:
             self.trace_robot(robot) #trace du robot
             self.draw_robot(robot)
