@@ -21,8 +21,12 @@ class RoboCar:
 
         self.simulation = simulation #reference vers le monde
 
-        self.crayon_dessine = True #trace tme_solo
+        self.crayon_dessine = False #crayon robot
         self.all_trace = [] #ensemble de points tracés
+
+    def dessine(self, b:bool):
+        """ active ou desactive le crayon du robot """
+        self.crayon_dessine = b;
 
     def get_position(self):
         """Retourne (x, y)"""
