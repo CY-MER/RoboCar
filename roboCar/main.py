@@ -12,21 +12,20 @@ def main():
     sim = Simulation(LARGEUR, HAUTEUR) #creation du monde
 
     robot1 = RoboCar("Flash1", (40, 270), 0, simulation=sim) #creation du robot
-    robot2 = RoboCar("Flash2", (860, 270), 90, simulation=sim) #creation du robot
+    robot2 = RoboCar("Flash2", (860, 270), 180, simulation=sim) #creation du robot
     adp1 = AdaptateurSimule(robot1) #adaptateur de pilotage
     adp2 = AdaptateurSimule(robot2)
 
-    ballon = Ballon((450, 300))
-    ballon.pousser(10, 15) #vitesse initiale du ballon
+    ballon = Ballon((450, 290))
+    ballon.pousser(5, 0) #vitesse initiale du ballon
 
     view = Affichage(LARGEUR, HAUTEUR) #affichage
 
-    strat1 = Faire_Carre(adp1)
-    strat2 = Allez_retour(adp2)
+    strat1 = creer_strategie(adp1)
+    strat2 = creer_strategie(adp2)
 
     running = True
     while running:
-        """
         if strat1.step(): #execution d'un pas de strategie (check si on passe a la suivante)
             robot1.change_couleur((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
         #mise a jour physique du robot
@@ -37,8 +36,9 @@ def main():
             robot2.change_couleur((random.randint(0,255),random.randint(0,255),random.randint(0,255)))
         if not robot2.step():
             adp2.arreter()
-        """
         ballon.step() #physique du ballon
+        ballon.robot_pousse(robot1)
+        ballon.robot_pousse(robot2)
 
         #affichage
         running = view.update([robot1, robot2], sim.obstacles, ballon)

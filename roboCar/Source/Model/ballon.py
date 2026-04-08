@@ -16,6 +16,14 @@ class Ballon:
         self.vect_x += vit * math.cos(angle)
         self.vect_y += vit * math.sin(angle)
 
+    def robot_pousse(self, robot):
+        """si robot à une distance inferieure au rayon, robot pousse le ballon"""
+        dx = self.x - robot.x
+        dy = self.y - robot.y
+        dist = math.sqrt(dx**2 + dy**2)
+        if dist < self.rayon:
+            self.pousser(robot.set_vitesse()[0], robot.get_angle())
+
     def step(self):
         """ bouge le ballon selon son vecteur de vitesse """
 
