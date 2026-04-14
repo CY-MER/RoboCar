@@ -37,3 +37,15 @@ def main():
         )
         obstacles_3d.append(obj)
     robot_3d = box(pos=vector(robot.x, 15, conv_y(robot.y)),size=vector(robot.longueur, 30, robot.largeur),color=color.blue) #creation du robot 3d
+    while True:
+        rate(60) #rate(60) limite la boucle a environ 60 iterations par seconde
+        strat.step()
+        if not robot.step():
+            adp.arreter()
+        robot_3d.pos = vector(robot.x, 15, conv_y(robot.y)) #on prend la position logique du robot et on l'affiche en 3d
+
+        #axis represente la direction de la boite donc on oriente la boite 3d dans la bonne direction
+        robot_3d.axis = vector(robot.longueur * math.cos(robot.angle), 0, -robot.longueur * math.sin(robot.angle)) #on met -sin pour qu'elle devient la composante en z du monde 3d
+
+if __name__ == "__main__":
+    main()
